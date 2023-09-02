@@ -1,0 +1,47 @@
+DATA:
+  data_root: /scratch/scannet-pspnet-finetune
+  train_list: /scratch/scannet-pspnet-finetune/list/training.txt
+  # val_list: /scratch/scannet-pspnet-finetune/list/validation.txt
+  # data_root: temp_dataset
+  # train_list: temp_dataset/list/training.txt
+  # val_list: temp_dataset/list/validation.txt
+  classes: 41
+
+TRAIN:
+  arch: psp
+  layers: 50
+  sync_bn: True  # adopt sync_bn or not
+  train_h: 473
+  train_w: 473
+  scale_min: 0.5  # minimum random scale
+  scale_max: 2.0  # maximum random scale
+  rotate_min: -10  # minimum random rotate
+  rotate_max: 10  # maximum random rotate
+  zoom_factor: 8  # zoom factor for final prediction during training, be in [1, 2, 4, 8]
+  ignore_label: 0
+  aux_weight: 0.4
+  # train_gpu: [0, 1]
+  train_gpu: [0]
+  workers: 16  # data loader workers
+  batch_size: 4  # batch size for training
+  batch_size_val: 8  # batch size for validation during training, memory and speed tradeoff
+  base_lr: 0.01
+  epochs: 30
+  start_epoch: 0
+  power: 0.9
+  momentum: 0.9
+  weight_decay: 0.0001
+  manual_seed:
+  print_freq: 10
+  save_freq: 1
+  save_path: /cluster/scratch/guanji/Experiments/PSPNet/scannet/pspnet50/model
+  weight:  # path to initial weight (default: none)
+  resume:  # path to latest checkpoint (default: none)
+  evaluate: False  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+  pretrain_state_dict: /cluster/home/guanji/Models/PSPNet/pspnet_res50_ade20k-init_scannet-adapt.pth
+Distributed:
+  dist_url: tcp://127.0.0.1:6789
+  dist_backend: 'nccl'
+  multiprocessing_distributed: True
+  world_size: 1
+  rank: 0
