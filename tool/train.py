@@ -121,7 +121,7 @@ def main_worker(gpu, ngpus_per_node, argss):
     criterion = nn.CrossEntropyLoss(ignore_index=args.ignore_label)
     if args.arch == 'psp':
         from model.pspnet import PSPNet
-        model = PSPNet(layers=args.layers, classes=args.classes, zoom_factor=args.zoom_factor, criterion=criterion)
+        model = PSPNet(layers=args.layers, classes=args.classes, zoom_factor=args.zoom_factor, criterion=criterion, pretrained=False)
         modules_ori = [model.layer0, model.layer1, model.layer2, model.layer3, model.layer4]
         modules_new = [model.ppm, model.cls, model.aux]
     elif args.arch == 'psa':
@@ -131,6 +131,11 @@ def main_worker(gpu, ngpus_per_node, argss):
                        normalization_factor=args.normalization_factor, psa_softmax=args.psa_softmax, criterion=criterion)
         modules_ori = [model.layer0, model.layer1, model.layer2, model.layer3, model.layer4]
         modules_new = [model.psa, model.cls, model.aux]
+
+    # load pretrained model
+    if hasattr(args, 'pretrain_state_dict'):
+        model.load_state_dict(torch.load(args.pretrain_state_dict))
+
     params_list = []
     for module in modules_ori:
         params_list.append(dict(params=module.parameters(), lr=args.base_lr))

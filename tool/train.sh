@@ -1,18 +1,19 @@
 #!/bin/sh
 
-## uncomment for slurm
-##SBATCH -p gpu
-##SBATCH --gres=gpu:8
-##SBATCH -c 80
+#SBATCH --job-name="pspnet"
+#SBATCH --output=%j.out
+#SBATCH --time=10:00
+#SBATCH --ntasks=1
+#SBATCH --mem-per-cpu=16G
+#SBATCH --tmp=1150G
+#SBATCH --gpus=rtx_3090:1
 
-export PYTHONPATH=./
-eval "$(conda shell.bash hook)"
-conda activate pt140  # pytorch 1.4.0 env
-PYTHON=python
+PYTHON=/home/quanta/.conda/envs/semseg/bin/python
+export CUDA_DEVICE_ORDER=PCI_BUS_ID
 
 dataset=$1
 exp_name=$2
-exp_dir=exp/${dataset}/${exp_name}
+exp_dir=/cluster/scratch/guanji/Experiments/PSPNet/${dataset}/${exp_name}
 model_dir=${exp_dir}/model
 result_dir=${exp_dir}/result
 config=config/${dataset}/${dataset}_${exp_name}.yaml
@@ -22,10 +23,7 @@ mkdir -p ${model_dir} ${result_dir}
 cp tool/train.sh tool/train.py tool/test.sh tool/test.py ${config} ${exp_dir}
 
 export PYTHONPATH=./
-$PYTHON -u ${exp_dir}/train.py \
-  --config=${config} \
-  2>&1 | tee ${model_dir}/train-$now.log
-
-$PYTHON -u ${exp_dir}/test.py \
-  --config=${config} \
-  2>&1 | tee ${result_dir}/test-$now.log
+# copy files
+$PYTHON -u ${exp_dir}/train.py --config=${config} 2>&1 | tee ${model_dir}/train-$now.log
+# training
+$PYTHON -u ${exp_dir}/train.py --config=${config} 2>&1 | tee ${model_dir}/train-$now.log
