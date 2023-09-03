@@ -2,28 +2,34 @@
 
 #SBATCH --job-name="pspnet"
 #SBATCH --output=%j.out
-#SBATCH --time=10:00
+#SBATCH --time=25:00:00
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=16G
+#SBATCH --mem-per-cpu=48G
 #SBATCH --tmp=1150G
-#SBATCH --gpus=rtx_3090:1
+#SBATCH --gpus=rtx_2080_ti:1
 
-PYTHON=/home/quanta/.conda/envs/semseg/bin/python
+module load gcc/8.2.0 python_gpu/3.8.5 cuda/10.1.243 cudnn/8.0.5 git-lfs/2.3.0 git/2.31.1 eth_proxy
+
+nvidia-smi
+
+PYTHON=/cluster/scratch/guanji/.python_venv/semseg/bin/python
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
+export CUDA_VISIBLE_DEVICES=0
+# export CUDA_LAUNCH_BLOCKING=1
 
-dataset=$1
-exp_name=$2
+dataset=scannet
+exp_name=pspnet50
 exp_dir=/cluster/scratch/guanji/Experiments/PSPNet/${dataset}/${exp_name}
 model_dir=${exp_dir}/model
 result_dir=${exp_dir}/result
-config=config/${dataset}/${dataset}_${exp_name}.yaml
+config=/cluster/home/guanji/Projects/semseg/config/${dataset}/${dataset}_${exp_name}.yaml
 now=$(date +"%Y%m%d_%H%M%S")
 
 mkdir -p ${model_dir} ${result_dir}
 cp tool/train.sh tool/train.py tool/test.sh tool/test.py ${config} ${exp_dir}
 
-export PYTHONPATH=./
+export PYTHONPATH=/cluster/home/guanji/Projects/semseg
 # copy files
-$PYTHON -u ${exp_dir}/train.py --config=${config} 2>&1 | tee ${model_dir}/train-$now.log
+# $PYTHON scannet_copy_data.py
 # training
-$PYTHON -u ${exp_dir}/train.py --config=${config} 2>&1 | tee ${model_dir}/train-$now.log
+$PYTHON ${exp_dir}/train.py --config=${config}

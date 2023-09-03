@@ -82,6 +82,7 @@ def check(args):
 def main():
     args = get_parser()
     check(args)
+    torch.backends.cudnn.enabled = False
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.train_gpu)
     if args.manual_seed is not None:
         random.seed(args.manual_seed)
@@ -134,7 +135,9 @@ def main_worker(gpu, ngpus_per_node, argss):
 
     # load pretrained model
     if hasattr(args, 'pretrain_state_dict'):
+        print("found pretrained weight")
         model.load_state_dict(torch.load(args.pretrain_state_dict))
+        print("pretrained weight loaded")
 
     params_list = []
     for module in modules_ori:

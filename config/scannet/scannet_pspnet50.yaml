@@ -1,6 +1,6 @@
 DATA:
-  data_root: /scratch/scannet-pspnet-finetune
-  train_list: /scratch/scannet-pspnet-finetune/list/training.txt
+  data_root: /cluster/project/cvg/weders/data/scannet
+  train_list: /cluster/home/guanji/Projects/semseg/dataset/scannet/list/training.txt
   # val_list: /scratch/scannet-pspnet-finetune/list/validation.txt
   # data_root: temp_dataset
   # train_list: temp_dataset/list/training.txt
